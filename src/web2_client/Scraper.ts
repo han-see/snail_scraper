@@ -1,8 +1,10 @@
 import axios from 'axios';
-import { Marketplace } from '../common/MarketplaceResponse';
+import { Marketplace, Snail } from '../common/MarketplaceResponse';
 import * as fs from 'fs';
+import 'dotenv/config';
 import { Adaptations, Family } from '../common/Family';
 import { QueryAllSnail, QueryFilter } from './Query';
+import { Webhook } from '../common/Webhook';
 
 const URL = 'https://api.snailtrail.art/graphql/';
 
@@ -30,12 +32,11 @@ const config = {
   },
 };
 
-const queryFilter: QueryFilter = {
-  family: Family.Atlantis,
-  adaptations: [Adaptations.Dodge]
-};
+const queryFilter: QueryFilter = {};
 
 const queryAllSnail = new QueryAllSnail(queryFilter, 20);
+
+const pingedSnail: number[] = [];
 
 export async function scrapeMarketplace() {
   try {
@@ -43,7 +44,39 @@ export async function scrapeMarketplace() {
     const data = JSON.stringify(res.data);
     await fs.writeFileSync('response.json', data);
     console.log(`Status: ${res.status}`);
+    checkMarketPlacePrice(res.data);
   } catch (err) {
     console.error(err);
+  }
+}
+
+function checkMarketPlacePrice(data: Marketplace) {
+  const snailData: Snail[] = data.data.marketplace_promise.snails;
+  const discount = parseInt(process.env.SNAIL_DISCOUNT);
+  const maxAvaxPrice = parseInt(process.env.SNAIL_MAX_PRICE);
+
+  if (snailData.length > 1) {
+    if (
+      snailData[0].market.price <= snailData[1].market.price * (1 - discount) &&
+      snailData[0].market.on_sale
+    ) {
+      pingUserForDiscount(snailData[0]);
+    }
+  }
+  if (snailData[0].market.price <= maxAvaxPrice) {
+    pingUserForDiscount(snailData[0]);
+  }
+}
+
+function pingUserForDiscount(snail: Snail) {
+  if (!pingedSnail.includes(snail.id)) {
+    const webhook = new Webhook(
+      `${snail.name} is on sale for ${snail.market.price} AVAX`,
+      `Adaptations: ${snail.adaptations}`,
+      `https://www.snailtrail.art/snails/${snail.id}/snail`,
+      snail.image,
+    );
+    webhook.sendMessage();
+    pingedSnail.push(snail.id);
   }
 }
