@@ -1,5 +1,11 @@
-import { Family, Klass, Generation, Adaptations, Purity } from "../common/Family";
-import { Gender } from "../common/SnailDetails";
+import {
+  Family,
+  Klass,
+  Generation,
+  Adaptations,
+  Purity,
+} from '../common/Family';
+import { Gender } from '../common/SnailDetails';
 
 export interface Query {
   operationName: string;
@@ -57,14 +63,5 @@ export class QueryAllSnail implements Query {
                 __typename
             }
         }`;
-  }
-
-  getPayload(): Query {
-    const payload = {
-      operationName: this.operationName,
-      variables: this.variables,
-      query: this.query,
-    };
-    return payload;
   }
 }
