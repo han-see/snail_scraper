@@ -1,0 +1,17 @@
+[
+    // for the parameter see Family.ts in Common
+    // Add the parameter number for example family : 1 etc
+    {
+    "discount": 0.1,
+    "maxPrice": 5.5 (MaxPrice in Avax),
+    "filter": {
+      "family": xx,
+      "klass": xx,
+      "generation": xx,
+      "adaptations" : [],
+      "purity": xx,
+      "gender" : xx,
+      "visuals" : xx
+    }
+  }
+]
