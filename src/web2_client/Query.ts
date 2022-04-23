@@ -10,7 +10,7 @@ import { Gender } from '../common/SnailDetails';
 export interface Query {
   operationName: string;
   variables: {
-    filters: QueryFilter;
+    filters: QueryFilter | IQueryFilter;
   };
   query: string;
 }
@@ -25,12 +25,22 @@ export interface QueryFilter {
   visuals?: any;
 }
 
+export interface IQueryFilter {
+  family?: number;
+  klass?: number;
+  generation?: number;
+  adaptations?: number[];
+  purity?: number;
+  gender?: number;
+  visuals?: any;
+}
+
 export class QueryAllSnail implements Query {
   operationName = 'getAllSnail';
-  variables: { filters: QueryFilter };
+  variables: { filters: QueryFilter | IQueryFilter };
   query: string;
 
-  constructor(filter: QueryFilter, private size: number = 12) {
+  constructor(filter: QueryFilter | IQueryFilter, private size: number = 12) {
     this.operationName = 'getAllSnail';
     this.variables = {
       filters: filter,
@@ -46,7 +56,7 @@ export class QueryAllSnail implements Query {
                 snails {
                     id
                     adaptations
-                    name
+                name
                     image
                     market {
                     price
