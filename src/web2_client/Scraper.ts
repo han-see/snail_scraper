@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Marketplace, Snail } from '../common/MarketplaceResponse';
 import * as fs from 'fs';
 import 'dotenv/config';
-import { IQueryFilter, QueryAllSnail, QueryFilter } from './Query';
+import { IQueryFilter, QueryAllSnail } from './Query';
 import { Webhook } from '../common/Webhook';
 import { UserInput } from '../common/UserInput';
 
