@@ -1,9 +1,12 @@
  #!/bin/bash
 set -x
+git clone git@github.com:han-see/snail_scraper.git
 cd snail_scraper/
+npm install
+nano .env.example
+nano userInput.example
 forever stopall
 forever cleanlogs
-git pull
 npm run build:release
 forever start -c "npm run start" ./
 tail -f ~/.forever/*.log
