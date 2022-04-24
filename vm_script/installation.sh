@@ -6,7 +6,7 @@ chmod +x *.sh
 cd ..
 npm install
 nano .env.example
-nano userInput.example
+nano userInput.json.example
 forever stopall
 forever cleanlogs
 npm run build:release

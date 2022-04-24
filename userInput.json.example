@@ -1,0 +1,14 @@
+[
+  {
+  "discount": 0.1,
+  "maxPrice": 3,
+  "filter": {
+    "family": 1,
+  },
+  {
+  "discount": 0.15,
+  "maxPrice": 20,
+  "filter": {
+    "family": 5
+  }
+]
