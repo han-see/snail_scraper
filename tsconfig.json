@@ -20,5 +20,5 @@
     "strictNullChecks": false,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "__tests__/**/*"]
+  "include": ["src/**/*"]
 }
