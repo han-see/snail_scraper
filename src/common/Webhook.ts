@@ -1,6 +1,5 @@
 import { MessageEmbed, MessageEmbedFooter, WebhookClient } from 'discord.js';
 import 'dotenv/config';
-
 export class Webhook {
   embed: MessageEmbed;
   footer: MessageEmbedFooter;
@@ -26,9 +25,13 @@ export class Webhook {
   }
 
   sendMessage() {
-    this.webhookClient.send({
-      content: `<@${process.env.DISCORD_USER_ID}>\n${this.embed.title}`,
-      embeds: [this.embed],
-    });
+    this.webhookClient
+      .send({
+        content: `<@${process.env.DISCORD_USER_ID}>\n${this.embed.title}`,
+        embeds: [this.embed],
+      })
+      .catch((err) => {
+        console.error('Cannot send message to discord', err);
+      });
   }
 }
