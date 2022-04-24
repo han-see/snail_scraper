@@ -75,3 +75,109 @@ export class QueryAllSnail implements Query {
         }`;
   }
 }
+
+export class QuerySingleSnail implements Query {
+  operationName = 'getSingleSnail';
+  variables = {
+    filters: {},
+  };
+  query: string;
+  constructor(private snailId: number) {
+    this.snailId = snailId;
+    this.query = `
+      query getSingleSnail {
+        snail_promise(token_id: ${this.snailId}) {
+          ... on Problem {
+            problem
+            __typename
+          }
+          ... on Snail {
+            id
+            klass
+            generation
+            adaptations
+            purity
+            gender {
+              value
+              id
+              __typename
+            }
+            name
+            genome
+            family
+            image
+            owner
+            holder
+            market {
+              price
+              item_id
+              price_wei
+              on_sale
+              last_sale
+              highest_sale
+              __typename
+            }
+            gene_market {
+              price
+              item_id
+              price_wei
+              on_sale
+              __typename
+            }
+            stats {
+              races
+              elo
+              earned_avax
+              earned_token
+              win_ratio
+              top_three_ratio
+              experience {
+                xp
+                level
+                on
+                remaining
+                reward
+                __typename
+              }
+              __typename
+            }
+            visuals {
+              trait_type
+              value
+              count
+              percentage
+              __typename
+            }
+            more_stats(seasons: [1]) {
+              season
+              season_stats {
+                category_name
+                category_id
+                category_stats {
+                  ... on CounterStat {
+                    name
+                    count
+                    __typename
+                  }
+                  ... on MeanStat {
+                    name
+                    count
+                    min
+                    mean
+                    max
+                    std
+                    __typename
+                  }
+                  __typename
+                }
+                __typename
+              }
+              __typename
+            }
+            __typename
+          }
+          __typename
+        }
+      }`;
+  }
+}
