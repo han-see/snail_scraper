@@ -2,9 +2,10 @@ import axios from 'axios';
 import { Marketplace, Snail } from '../common/MarketplaceResponse';
 import * as fs from 'fs';
 import 'dotenv/config';
-import { IQueryFilter, QueryAllSnail } from './Query';
+import { IQueryFilter, QueryAllSnail, QuerySingleSnail } from './Query';
 import { Webhook } from '../common/Webhook';
 import { UserInput } from '../common/UserInput';
+import { SnailDetails } from '../common/SnailDetails';
 
 const URL = 'https://api.snailtrail.art/graphql/';
 
@@ -81,24 +82,69 @@ export class Scraper {
           snailData[1].market.price * (1 - discount) &&
         snailData[0].market.on_sale
       ) {
-        this.pingUserForDiscount(snailData[0]);
+        this.pingUserForDiscount(snailData[0], snailData[1].market.price);
+      } else if (snailData[0].market.price <= maxAvaxPrice) {
+        this.pingUserForDiscount(snailData[0], snailData[1].market.price);
       }
-    }
-    if (snailData[0].market.price <= maxAvaxPrice) {
-      this.pingUserForDiscount(snailData[0]);
     }
   }
 
-  pingUserForDiscount(snail: Snail) {
+  async pingUserForDiscount(snail: Snail, nextSnailPrice?: number) {
     if (!this.pingedSnail.includes(snail.id)) {
-      const webhook = new Webhook(
-        `${snail.name} is on sale for ${snail.market.price} AVAX`,
-        `Adaptations: ${snail.adaptations}`,
-        `https://www.snailtrail.art/snails/${snail.id}/snail`,
-        snail.image,
-      );
-      webhook.sendMessage();
-      this.pingedSnail.push(snail.id);
+      const snailDetail = await this.getSnailDetail(snail);
+      const formattedData = this.formatSnailDetail(snailDetail);
+      if (snailDetail) {
+        const snailDataDetail = snailDetail.data.snail_promise;
+        const webhook = new Webhook(
+          `${snailDataDetail.id} (${snailDataDetail.family}) is on sale for ${snail.market.price} AVAX`,
+          formattedData,
+          `https://www.snailtrail.art/snails/${snail.id}/snail`,
+          snail.image,
+          nextSnailPrice,
+        );
+        webhook.sendMessage();
+        this.pingedSnail.push(snail.id);
+      }
     }
+  }
+
+  async getSnailDetail(snail: Snail) {
+    try {
+      const res = await axios.post<SnailDetails>(
+        URL,
+        new QuerySingleSnail(snail.id),
+        config,
+      );
+      console.log(res.status);
+      return res.data;
+    } catch (err) {
+      console.error('Error fetching single snail', err);
+    }
+    return null;
+  }
+
+  formatSnailDetail(snailDetail: SnailDetails): string {
+    if (snailDetail == null) {
+      return '';
+    }
+    const data = snailDetail.data.snail_promise;
+    const str = `Family: ${data.family}
+    \nKlass: ${data.klass}
+    \nGeneration: ${data.generation}
+    \nPurity: ${data.purity}
+    \nGender: ${data.gender.value}
+    \nAdaptations: ${data.adaptations}
+    \nGene: ${data.genome}
+    \nLast Sale: ${data.market.last_sale} AVAX
+    \nHighest Sale: ${data.market.highest_sale} AVAX
+    \nStats:
+    Level: ${data.stats.experience.level}
+    Win Ratio: ${data.stats.win_ratio}
+    Top Three Ratio: ${data.stats.top_three_ratio}
+    Races: ${data.stats.races}
+    Elo: ${data.stats.elo}
+    Earned Avax: ${data.stats.earned_avax}
+    Earned Token: ${data.stats.earned_token}`;
+    return '```' + str + '```';
   }
 }
