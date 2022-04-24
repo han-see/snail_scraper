@@ -20,7 +20,7 @@ export class Webhook {
       .setThumbnail(this.thumbnail)
       .setTimestamp();
     this.embed.footer = {
-      text: `Next Snail in Category: ${this.nextSnailPrice} AVAX`,
+      text: `Next Snail's price in Category: ${this.nextSnailPrice} AVAX`,
     };
   }
 
