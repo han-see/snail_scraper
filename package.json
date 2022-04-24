@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
-  "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "name": "snail-scraper-bot",
+  "version": "0.0.1",
+  "description": "Snail Scraper Bot",
   "type": "module",
   "engines": {
     "node": ">= 16.13 <17"
@@ -32,8 +32,8 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch"
   },
-  "author": "Jakub Synowiec <jsynowiec@users.noreply.github.com>",
-  "license": "Apache-2.0",
+  "author": "Hansee <russellthewildexplorer@gmail.com>",
+  "license": "MIT-License",
   "dependencies": {
     "axios": "^0.26.1",
     "discord.js": "^13.6.0",
