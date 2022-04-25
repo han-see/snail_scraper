@@ -59,7 +59,7 @@ export class Scraper {
         config,
       );
       const data = JSON.stringify(res.data);
-      await fs.writeFileSync('response.json', data);
+      fs.writeFileSync('response.json', data);
       console.log(`Status: ${res.status}`);
       console.log(`Discount: ${this.discount}`);
       console.log(`Price: ${this.maxPrice}`);
