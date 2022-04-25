@@ -9,7 +9,7 @@ import { SnailDetails } from '../common/SnailDetails';
 
 const URL = 'https://api.snailtrail.art/graphql/';
 
-const config = {
+const DEFAULT_HEADER = {
   headers: {
     authority: 'api.snailtrail.art',
     method: 'POST',
@@ -56,7 +56,7 @@ export class Scraper {
       const res = await axios.post<Marketplace>(
         URL,
         this.queryAllSnail,
-        config,
+        DEFAULT_HEADER,
       );
       const data = JSON.stringify(res.data);
       fs.writeFileSync('response.json', data);
@@ -113,7 +113,7 @@ export class Scraper {
       const res = await axios.post<SnailDetails>(
         URL,
         new QuerySingleSnail(snail.id),
-        config,
+        DEFAULT_HEADER,
       );
       console.log(res.status);
       return res.data;
