@@ -33,10 +33,13 @@
   "author": "Hansee <russellthewildexplorer@gmail.com>",
   "license": "MIT-License",
   "dependencies": {
+    "@types/prompt-sync": "^4.1.1",
     "axios": "^0.26.1",
     "discord.js": "^13.6.0",
     "dotenv": "^16.0.0",
+    "ethers": "^5.6.4",
     "forever": "^4.0.3",
+    "prompt-sync": "^4.2.0",
     "tslib": "~2.3.1"
   },
   "volta": {
