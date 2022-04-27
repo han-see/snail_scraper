@@ -1,22 +1,11 @@
-/*     These two functions are a really simple way to hide/unhide a string.
-    The goal is not to be cryptographically secure, just to manufacture a simple
-    reversable operation that won't resemble a private key.
-    Even if there's some kind of malware running on the machine, this should
-    be enough to keep things safe.
- */
-
 import PromptSync from 'prompt-sync';
 import * as fs from 'fs';
 import { Wallet } from 'ethers';
 import 'dotenv/config';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { MORALIS } from './RpcEndpoints';
 
 export class Account {
   static async loadAccount() {
     const password = process.env.PASSWORD;
-    //const providerAPI = MORALIS;
-    //const provider = new JsonRpcProvider(providerAPI);
     try {
       const credentials = fs.readFileSync('credentials.json').toString();
       const account = Wallet.fromEncryptedJsonSync(credentials, password);
