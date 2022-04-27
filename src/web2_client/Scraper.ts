@@ -3,7 +3,7 @@ import { Marketplace, Snail } from '../types/MarketplaceResponse';
 import * as fs from 'fs';
 import 'dotenv/config';
 import { IQueryFilter, QueryAllSnail, QuerySingleSnail } from './Query';
-import { Webhook } from '../common/Webhook';
+import { Webhook } from './Webhook';
 import { UserInput } from '../types/UserInput';
 import { SnailDetails } from '../types/SnailDetails';
 
