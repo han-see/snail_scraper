@@ -1,11 +1,11 @@
 import axios from 'axios';
-import { Marketplace, Snail } from '../Types/MarketplaceResponse';
+import { Marketplace, Snail } from '../types/MarketplaceResponse';
 import * as fs from 'fs';
 import 'dotenv/config';
 import { IQueryFilter, QueryAllSnail, QuerySingleSnail } from './Query';
 import { Webhook } from '../common/Webhook';
-import { UserInput } from '../Types/UserInput';
-import { SnailDetails } from '../Types/SnailDetails';
+import { UserInput } from '../types/UserInput';
+import { SnailDetails } from '../types/SnailDetails';
 
 const URL = 'https://api.snailtrail.art/graphql/';
 
