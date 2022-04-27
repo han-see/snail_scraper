@@ -4,8 +4,8 @@ import {
   Generation,
   Adaptations,
   Purity,
-} from '../common/Family';
-import { Gender } from '../common/SnailDetails';
+} from '../Types/Family';
+import { Gender } from '../Types/SnailDetails';
 
 export interface Query {
   operationName: string;
