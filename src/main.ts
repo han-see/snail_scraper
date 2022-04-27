@@ -1,5 +1,6 @@
 import { Scraper } from './web2_client/Scraper';
 import userInput from '../userInput.json';
+import { Account } from './common/Account';
 
 const scraperList: Scraper[] = [];
 
@@ -34,3 +35,5 @@ async function initiateBot() {
 }
 
 botLoop();
+//Account.makeNewAccount();
+//Account.loadAccount();
