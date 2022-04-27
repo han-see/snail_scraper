@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import { Wallet } from 'ethers';
 import 'dotenv/config';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { MORALIS } from '../web3_client/RpcEndpoints';
+import { MORALIS } from './RpcEndpoints';
 
 export class Account {
   static async loadAccount() {

@@ -1,6 +1,6 @@
 import { Scraper } from './web2_client/Scraper';
 import userInput from '../userInput.json';
-import { Account } from './common/Account';
+import { Account } from './config/Account';
 
 const scraperList: Scraper[] = [];
 
