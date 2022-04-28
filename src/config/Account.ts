@@ -4,13 +4,17 @@ import { Wallet } from 'ethers';
 import 'dotenv/config';
 
 export class Account {
-  static async loadAccount() {
+  private _walletAddress;
+  private _wallet;
+
+  async loadAccount() {
     const password = process.env.PASSWORD;
     try {
       const credentials = fs.readFileSync('credentials.json').toString();
-      const account = Wallet.fromEncryptedJsonSync(credentials, password);
-      console.log(`Account ${await account.getAddress()} is loaded`);
-      return account;
+      const wallet = Wallet.fromEncryptedJsonSync(credentials, password);
+      console.log(`Account ${await wallet.getAddress()} is loaded`);
+      this._wallet = wallet;
+      this._walletAddress = await wallet.getAddress();
     } catch (err) {
       console.error('Account cannot be loaded', err);
     }
@@ -32,5 +36,13 @@ export class Account {
     } catch (err) {
       console.error('Account creation is not successful', err);
     }
+  }
+
+  public get walletAddress() {
+    return this._walletAddress;
+  }
+
+  public get wallet() {
+    return this._wallet;
   }
 }
