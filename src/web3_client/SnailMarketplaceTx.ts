@@ -1,10 +1,10 @@
 import { BigNumber, ethers, Transaction, Wallet } from 'ethers';
 import { Account } from '../config/Account';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { AVAX_NODE } from '../config/RpcEndpoints';
+import { AVAX_NODE } from '../config/Endpoint';
+import { SNAIL_MARKETPLACE_CONTRACT } from '../config/Contract';
 
 export class SnailMarketplaceTx {
-  private marketplaceContract = '0xeb77bd67Bd607e5b7d9b78db82fad0DE395B5DeF';
   private wallet: Wallet;
   private walletAddress: string;
   private provider: JsonRpcProvider;
@@ -29,7 +29,7 @@ export class SnailMarketplaceTx {
 
     const unSignedTx: Transaction = {
       from: this.walletAddress,
-      to: this.marketplaceContract,
+      to: SNAIL_MARKETPLACE_CONTRACT,
       nonce: walletNonce,
       // gasLimit taken from the recent contract call from snowtrace.
       gasLimit: BigNumber.from(160000),

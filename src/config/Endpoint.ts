@@ -1,0 +1,41 @@
+// Moralis WSS Endpoint Hansee
+export const MORALIS_WS =
+  'wss://speedy-nodes-nyc.moralis.io/5a4d76c5b7eb6c76fe360efc/avalanche/mainnet/ws';
+
+// Moralis https Endpoint Hansee
+export const MORALIS =
+  'https://speedy-nodes-nyc.moralis.io/5a4d76c5b7eb6c76fe360efc/avalanche/mainnet';
+
+// Default AVAX RPC endpoint
+export const AVAX_NODE = 'https://api.avax.network/ext/bc/C/rpc';
+
+// Default AVAX RPC endpoint, for websockets
+export const AVAX_WS_NODE = 'wss://api.avax.network/ext/bc/C/ws';
+
+// Snail Marketplace graphql url
+export const MARKETPLACE_GQL_URL = 'https://api.snailtrail.art/graphql/';
+
+// Default marketplace header request
+export const DEFAULT_MARKETPLACE_HEADER = {
+  headers: {
+    authority: 'api.snailtrail.art',
+    method: 'POST',
+    path: '/graphql/',
+    scheme: 'https',
+    accept: 'application/json, text/plain, */*',
+    'accept-encoding': 'gzip, deflate, br',
+    'accept-language': 'en,en-US;q=0.9,de;q=0.8,id;q=0.7',
+    'content-type': 'application/json',
+    origin: 'https://www.snailtrail.art',
+    referer: 'https://www.snailtrail.art/',
+    'sec-ch-ua':
+      '" Not A;Brand";v="99", "Chromium";v="100", "Google Chrome";v="100"',
+    'sec-ch-ua-mobile': '?1',
+    'sec-ch-ua-platform': '"Android"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-site',
+    'user-agent':
+      'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36',
+  },
+};
