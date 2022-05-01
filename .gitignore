@@ -31,3 +31,4 @@ build/
 .env
 userInput.json
 credentials.json
+floorPrice.json
