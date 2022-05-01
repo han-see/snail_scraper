@@ -57,6 +57,12 @@ export class EventBot {
 
   async listenToListingEvent() {
     console.log(await this.provider.getNetwork());
+    console.log(
+      `Looking for at least ${
+        parseInt(process.env.DISCOUNT) * 100
+      }% discount from market`,
+    );
+    console.log(`Maximum buying price is ${process.env.MAXPRICE}`);
     try {
       console.log('Listening to the listing event');
       this.provider.on(listingInMarketplace, (log: BlockEvent) => {
@@ -203,7 +209,7 @@ export class EventBot {
     this.refreshFloorPrice();
   }
 
-  refreshFloorPrice(){
+  refreshFloorPrice() {
     this.snailFloorPrice = JSON.parse(
       fs.readFileSync('./floorPrice.json').toString(),
     );
