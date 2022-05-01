@@ -1,4 +1,3 @@
 #!/bin/bash
 set -x
-cd snail_scraper/
-forever snail_scraper
+forever stop snail-scraper
