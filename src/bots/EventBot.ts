@@ -23,9 +23,9 @@ import { Family } from '../types/Family';
 import { Marketplace } from '../types/MarketplaceResponse';
 import { Webhook } from '../web2_client/Webhook';
 
-const minimumDiscount = parseInt(process.env.DISCOUNT);
+const minimumDiscount = parseFloat(process.env.DISCOUNT);
 
-const maxPrice = parseInt(process.env.MAXPRICE);
+const maxPrice = parseFloat(process.env.MAXPRICE);
 
 const marketplaceUpdatePriceTopics =
   '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
@@ -58,9 +58,7 @@ export class EventBot {
   async listenToListingEvent() {
     console.log(await this.provider.getNetwork());
     console.log(
-      `Looking for at least ${
-        parseInt(process.env.DISCOUNT) * 100
-      }% discount from market`,
+      `Looking for at least ${minimumDiscount * 100}% discount from market`,
     );
     console.log(`Maximum buying price is ${process.env.MAXPRICE}`);
     try {
