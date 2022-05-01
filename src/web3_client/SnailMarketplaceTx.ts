@@ -3,6 +3,7 @@ import { Account } from '../global/Account';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { AVAX_NODE } from '../global/config';
 import { SNAIL_MARKETPLACE_CONTRACT } from '../global/addresses';
+import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 export class SnailMarketplaceTx {
   private wallet: Wallet;
@@ -18,7 +19,7 @@ export class SnailMarketplaceTx {
   async buySnailFromMarketplace(
     marketId: string,
     snailPrice: string,
-  ): Promise<Transaction> {
+  ): Promise<TransactionResponse> {
     const walletNonce = await this.provider.getTransactionCount(
       this.walletAddress,
     );
@@ -51,7 +52,7 @@ export class SnailMarketplaceTx {
         txResponse = transaction;
       })
       .catch((err) => {
-        console.log('Transaction is not successful', err);
+        throw err;
       });
 
     return txResponse;
