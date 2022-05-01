@@ -52,9 +52,6 @@ export class EventBot {
   constructor(account: Account) {
     this.provider = new JsonRpcProvider(AVAX_NODE);
     this.account = account;
-    this.snailFloorPrice = JSON.parse(
-      fs.readFileSync('./floorPrice.json').toString(),
-    );
     this.snailMarketplaceTx = new SnailMarketplaceTx(account);
   }
 
@@ -112,6 +109,7 @@ export class EventBot {
             console.log(err);
             this.sendFailedTx(snailDetail, JSON.stringify(err), floorPrice);
           });
+        this.checkFloorPrice();
       }
     });
   }
@@ -202,6 +200,13 @@ export class EventBot {
     }
     console.log(content);
     fs.writeFileSync('./floorPrice.json', JSON.stringify(content));
+    this.refreshFloorPrice();
+  }
+
+  refreshFloorPrice(){
+    this.snailFloorPrice = JSON.parse(
+      fs.readFileSync('./floorPrice.json').toString(),
+    );
   }
 
   /**
