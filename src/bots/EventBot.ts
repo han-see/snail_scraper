@@ -1,5 +1,4 @@
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { parseSaleDataFromMarketplace, SaleEvent } from '../types/SaleEvent';
 import {
   AVAX_NODE,
   DEFAULT_MARKETPLACE_HEADER,
@@ -14,63 +13,69 @@ import { SNAIL_MARKETPLACE_CONTRACT } from '../global/addresses';
 import WebSocket from 'ws';
 import { Account } from '../global/Account';
 import { MempoolResponse } from '../types/MempoolResponse';
+import { BigNumber } from 'ethers';
+import 'dotenv/config';
+import { SnailFloorPrice } from '../types/SnailFloorPrice';
+import * as fs from 'fs';
+import { formatEther } from 'ethers/lib/utils';
+import {
+  BlockEvent,
+  parseListingDataFromMarketplace,
+} from '../types/MarketplaceEvent';
 
-const soldSnailTopics =
-  '0xdb9547d1dd4d503b0fb2c43a486eaab45eda512c8b43d5270a3fb6a25f3c6dc6';
+const minimumDiscount = parseInt(process.env.DISCOUNT);
 
-export const soldSnailInMarketplace = {
+const maxPrice = parseInt(process.env.MAXPRICE);
+
+const marketplaceUpdatePriceTopics =
+  '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
+
+const marketplaceListSnailTopics =
+  '0x8b5ebb2dc6de3438616ab5b99285b16a20fb015b845f3458d7215ec10de2c40f';
+
+const listingInMarketplace = {
   address: SNAIL_MARKETPLACE_CONTRACT,
-  topics: [soldSnailTopics],
+  topics: [marketplaceUpdatePriceTopics, marketplaceListSnailTopics],
 };
 
 export class EventBot {
   private provider: JsonRpcProvider;
   private account: Account;
+  private snailFloorPrice: SnailFloorPrice[];
 
   constructor(account: Account) {
     this.provider = new JsonRpcProvider(AVAX_NODE);
     this.account = account;
+    this.snailFloorPrice = JSON.parse(
+      fs.readFileSync('../floorPrice.json').toString(),
+    );
   }
 
-  async listenToEvent(filter) {
-    console.log('Listening to the event');
+  async listenToListingEvent() {
+    console.log('Listening to the update price event');
     console.log(await this.provider.getNetwork());
     try {
-      this.provider.on(filter, (log: SaleEvent) => {
-        const data = parseSaleDataFromMarketplace(log.data);
-        /* getSnailDetail(data.snailId).then((res) => {
-          pingDiscord(res, data);
-        }); */
+      this.provider.on(listingInMarketplace, (log: BlockEvent) => {
+        const data = parseListingDataFromMarketplace(log.data);
+
+        this.getSnailDetail(data.snailId).then((res) => {
+          const snailPrice = parseInt(formatEther(data.sellPrice));
+          const snailFamily = res.data.snail_promise.family;
+          const floorPrice = this.snailFloorPrice[snailFamily];
+          const discountPrice = floorPrice * (1 - minimumDiscount);
+
+          if (snailPrice <= discountPrice && snailPrice <= maxPrice) {
+            // buy snail from marketplace
+            console.log(data);
+          }
+        });
       });
     } catch (err) {
       console.error(err);
     }
   }
 
-  async connectToSnowsight() {
-    if (this.account.wallet == undefined) {
-      this.account.loadAccount();
-    }
-    const signed_key = await this.account.wallet.signMessage(SNOWSIGHT_KEY);
-
-    const message = JSON.stringify({ signed_key: signed_key });
-
-    const ws = new WebSocket(SNOWSIGHT_WS);
-
-    ws.on('open', () => {
-      ws.send(message);
-    });
-
-    ws.on('message', (data) => {
-      const mempoolResponse: MempoolResponse = JSON.parse(data.toString());
-      if (mempoolResponse.to == SNAIL_MARKETPLACE_CONTRACT.toLowerCase()) {
-        console.log(Date.now());
-        console.log(mempoolResponse);
-      }
-    });
-  }
-
-  async getSnailDetail(snailId: number) {
+  async getSnailDetail(snailId: number): Promise<SnailDetails> {
     try {
       const res = await axios.post<SnailDetails>(
         MARKETPLACE_GQL_URL,
