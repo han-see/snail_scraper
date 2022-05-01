@@ -4,23 +4,23 @@ import {
   DEFAULT_MARKETPLACE_HEADER,
   MARKETPLACE_GQL_URL,
 } from '../global/config';
-import { SnailDetails } from '../halolahslo/SnailDetails';
+import { SnailDetails } from '../types/SnailDetails';
 import axios from 'axios';
 import { QueryAllSnail, QuerySingleSnail } from '../web2_client/Query';
 import { SNAIL_MARKETPLACE_CONTRACT } from '../global/addresses';
 import { Account } from '../global/Account';
 import 'dotenv/config';
-import { SnailFloorPrice } from '../halolahslo/SnailFloorPrice';
+import { SnailFloorPrice } from '../types/SnailFloorPrice';
 import * as fs from 'fs';
 import userInput from '../../userInput.json';
 import {
   BlockEvent,
   ListingData,
   parseListingDataFromMarketplace,
-} from '../halolahslo/MarketplaceEvent';
+} from '../types/MarketplaceEvent';
 import { SnailMarketplaceTx } from '../web3_client/SnailMarketplaceTx';
-import { Family } from '../halolahslo/Family';
-import { Marketplace } from '../halolahslo/MarketplaceResponse';
+import { Family } from '../types/Family';
+import { Marketplace } from '../types/MarketplaceResponse';
 import { Webhook } from '../web2_client/Webhook';
 
 const minimumDiscount = parseInt(process.env.DISCOUNT);
