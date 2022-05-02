@@ -86,7 +86,6 @@ export class EventBot {
   checkEvent(data: ListingData) {
     console.log(`Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
-      console.log('Floor', this.snailFloorPrice);
       const snailDetail = res;
       const snailPrice = parseInt(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
@@ -97,6 +96,8 @@ export class EventBot {
       // Clean up the fast fix here
       if (snailPrice <= discountPrice && snailPrice <= maxPrice) {
         console.log(`Trying to buy snail ${data.snailId}`);
+        console.log('Floor', this.snailFloorPrice);
+        console.log('Checking floor price one more time');
         this.checkFloorPrice();
         if (!(snailPrice <= discountPrice && snailPrice <= maxPrice)) {
           console.log(
