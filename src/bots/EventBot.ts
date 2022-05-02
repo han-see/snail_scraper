@@ -86,6 +86,8 @@ export class EventBot {
   checkEvent(data: ListingData) {
     console.log(`Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
+      this.refreshFloorPrice();
+      console.log('Floor', this.snailFloorPrice);
       const snailDetail = res;
       const snailPrice = parseInt(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
