@@ -60,7 +60,7 @@ export class EventBot {
     console.log(
       `Looking for at least ${minimumDiscount * 100}% discount from market`,
     );
-    console.log(`Maximum buying price is ${process.env.MAXPRICE}`);
+    console.log(`Maximum buying price is ${process.env.MAXPRICE} AVAX`);
     try {
       console.log('Listening to the listing event');
       this.provider.on(listingInMarketplace, (log: BlockEvent) => {
@@ -84,6 +84,7 @@ export class EventBot {
    * @param data
    */
   checkEvent(data: ListingData) {
+    console.log(`Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
       const snailPrice = parseInt(data.sellPrice);
@@ -92,6 +93,7 @@ export class EventBot {
       const discountPrice = floorPrice * (1 - minimumDiscount);
 
       if (snailPrice <= discountPrice && snailPrice <= maxPrice) {
+        console.log(`Trying to buy snail ${data.snailId}`);
         this.sendBuyEventToUser(snailDetail, data, floorPrice);
         this.snailMarketplaceTx
           .buySnailFromMarketplace(
@@ -114,6 +116,11 @@ export class EventBot {
             this.sendFailedTx(snailDetail, JSON.stringify(err), floorPrice);
           });
         this.checkFloorPrice();
+      } else {
+        console.log(new Date().toUTCString());
+        console.log(
+          `Snail ${data.snailId} cost ${snailPrice} AVAX is higher than the max discounted Price ${discountPrice} AVAX`,
+        );
       }
     });
   }
@@ -172,7 +179,7 @@ export class EventBot {
         new QuerySingleSnail(snailId),
         DEFAULT_MARKETPLACE_HEADER,
       );
-      console.log(res.status);
+      console.log('Checking Snail Detail:', res.status);
       return res.data;
     } catch (err) {
       console.error('Error fetching single snail', err);
@@ -194,7 +201,7 @@ export class EventBot {
           new QueryAllSnail(userInput[i].filter),
           DEFAULT_MARKETPLACE_HEADER,
         );
-        console.log(res.status);
+        console.log('Checking the floor price: ', res.status);
         const family = userInput[i].filter.family;
         content[family] =
           res.data.data.marketplace_promise.snails[0].market.price;
