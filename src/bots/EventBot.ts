@@ -89,8 +89,11 @@ export class EventBot {
       const snailDetail = res;
       const snailPrice = parseInt(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
-      const floorPrice = this.snailFloorPrice[Family[snailFamily]];
-      const discountPrice = floorPrice * (1 - minimumDiscount);
+      let floorPrice = this.snailFloorPrice[Family[snailFamily]];
+      let discountPrice = floorPrice * (1 - minimumDiscount);
+      console.log('Snail listing price:', snailPrice)
+      console.log('Snail floor price:', floorPrice);
+      console.log('Discount price:', discountPrice);
 
       // TODO: Double check the floor price before buying
       // Clean up the fast fix here
@@ -98,7 +101,11 @@ export class EventBot {
         console.log(`Trying to buy snail ${data.snailId}`);
         console.log('Floor', this.snailFloorPrice);
         console.log('Checking floor price one more time');
+        console.log('Snail floor price:', floorPrice)
+        console.log('Discount price:', discountPrice)
         this.checkFloorPrice();
+        floorPrice = this.snailFloorPrice[Family[snailFamily]];
+        discountPrice = floorPrice * (1 - minimumDiscount);
         if (!(snailPrice <= discountPrice && snailPrice <= maxPrice)) {
           console.log(
             `Floor is not actual anymore. Second check is failing. Going out from the buying process`,
