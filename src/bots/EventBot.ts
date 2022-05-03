@@ -23,9 +23,9 @@ import { Family } from '../types/Family';
 import { Marketplace } from '../types/MarketplaceResponse';
 import { Webhook } from '../web2_client/Webhook';
 
-const minimumDiscount = parseFloat(process.env.DISCOUNT);
+const minimumDiscount = Number(process.env.DISCOUNT);
 
-const maxPrice = parseFloat(process.env.MAXPRICE);
+const maxPrice = Number(process.env.MAXPRICE);
 
 const marketplaceUpdatePriceTopics =
   '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
@@ -87,11 +87,11 @@ export class EventBot {
     console.log(`Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
-      const snailPrice = parseFloat(data.sellPrice);
+      const snailPrice = Number(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
       let floorPrice = this.snailFloorPrice[Family[snailFamily]];
       let discountPrice = floorPrice * (1 - minimumDiscount);
-      console.log('Snail listing price:', snailPrice)
+      console.log('Snail listing price:', snailPrice);
       console.log('Snail floor price:', floorPrice);
       console.log('Discount price:', discountPrice);
 
@@ -101,8 +101,8 @@ export class EventBot {
         console.log(`Trying to buy snail ${data.snailId}`);
         console.log('Floor', this.snailFloorPrice);
         console.log('Checking floor price one more time');
-        console.log('Snail floor price:', floorPrice)
-        console.log('Discount price:', discountPrice)
+        console.log('Snail floor price:', floorPrice);
+        console.log('Discount price:', discountPrice);
         this.checkFloorPrice();
         floorPrice = this.snailFloorPrice[Family[snailFamily]];
         discountPrice = floorPrice * (1 - minimumDiscount);
