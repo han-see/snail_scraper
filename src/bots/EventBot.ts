@@ -87,7 +87,7 @@ export class EventBot {
     console.log(`Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
-      const snailPrice = parseInt(data.sellPrice);
+      const snailPrice = parseFloat(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
       let floorPrice = this.snailFloorPrice[Family[snailFamily]];
       let discountPrice = floorPrice * (1 - minimumDiscount);
