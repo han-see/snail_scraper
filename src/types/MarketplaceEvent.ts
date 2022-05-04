@@ -31,7 +31,7 @@ export interface ListingData {
 }
 
 export function parseListingDataFromMarketplace(data) {
-  console.log('Parsing data')
+  console.log(new Date().toUTCString(), 'Parsing data')
   const abiCoder = new AbiCoder();
   const decodedData = abiCoder.decode(
     ['uint256', 'uint256', 'address', 'uint256', 'bool'],
