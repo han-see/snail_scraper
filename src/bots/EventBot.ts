@@ -64,11 +64,13 @@ export class EventBot {
     try {
       console.log('Listening to the listing event');
       this.provider.on(listingInMarketplace, (log: BlockEvent) => {
+        this.checkFloorPrice();
         const data = parseListingDataFromMarketplace(log.data);
         this.checkEvent(data);
       });
       console.log('Listening to the update price event');
       this.provider.on(priceUpdateInMarketplace, (log: BlockEvent) => {
+        this.checkFloorPrice();
         const data = parseListingDataFromMarketplace(log.data);
         this.checkEvent(data);
       });
@@ -84,39 +86,23 @@ export class EventBot {
    * @param data
    */
   checkEvent(data: ListingData) {
-    console.log(`Checking Snail ${data.snailId}`);
+    console.log(new Date().toUTCString(), `Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
       const snailPrice = Number(data.sellPrice);
       const snailFamily = res.data.snail_promise.family;
-      let floorPrice = this.snailFloorPrice[Family[snailFamily]];
-      let discountPrice = floorPrice * (1 - minimumDiscount);
+      const floorPrice = this.snailFloorPrice[Family[snailFamily]];
+      const discountPrice = floorPrice * (1 - minimumDiscount);
       console.log('Snail listing price:', snailPrice);
       console.log('Snail floor price:', floorPrice);
       console.log('Discount price:', discountPrice);
 
-      // TODO: Double check the floor price before buying
-      // Clean up the fast fix here
       if (snailPrice <= discountPrice && snailPrice <= maxPrice) {
-        console.log(`Trying to buy snail ${data.snailId}`);
+        console.log(
+          new Date().toUTCString(),
+          `Trying to buy snail ${data.snailId}`,
+        );
         console.log('Floor', this.snailFloorPrice);
-        console.log('Checking floor price one more time');
-        console.log('Snail floor price:', floorPrice);
-        console.log('Discount price:', discountPrice);
-        this.checkFloorPrice();
-        floorPrice = this.snailFloorPrice[Family[snailFamily]];
-        discountPrice = floorPrice * (1 - minimumDiscount);
-        if (!(snailPrice <= discountPrice && snailPrice <= maxPrice)) {
-          console.log(
-            `Floor is not actual anymore. Second check is failing. Going out from the buying process`,
-          );
-          this.sendFailedTx(
-            snailDetail,
-            'Floor price is not actual anymore. Calculation is wrong',
-            floorPrice,
-          );
-          return;
-        }
         this.sendBuyEventToUser(snailDetail, data, floorPrice);
         this.snailMarketplaceTx
           .buySnailFromMarketplace(
@@ -125,13 +111,23 @@ export class EventBot {
           )
           .then((res) => {
             if (res !== undefined) {
-              res.wait().then((data) => {
-                this.sendSuccessfulTx(
-                  snailDetail,
-                  JSON.stringify(data),
-                  floorPrice,
-                );
-              });
+              res
+                .wait()
+                .then((data) => {
+                  this.sendSuccessfulTx(
+                    snailDetail,
+                    JSON.stringify(data),
+                    floorPrice,
+                  );
+                })
+                .catch((err) => {
+                  console.log(err);
+                  this.sendFailedTx(
+                    snailDetail,
+                    JSON.stringify(err),
+                    floorPrice,
+                  );
+                });
             }
           })
           .catch((err) => {
