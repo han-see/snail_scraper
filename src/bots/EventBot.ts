@@ -86,6 +86,7 @@ export class EventBot {
    * @param data
    */
   checkEvent(data: ListingData) {
+    console.time('buyEvent');
     console.log(new Date().toUTCString(), `Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
@@ -134,6 +135,7 @@ export class EventBot {
             console.log(err);
             this.sendFailedTx(snailDetail, JSON.stringify(err), floorPrice);
           });
+        console.timeEnd('buyEvent');
       } else {
         console.log(new Date().toUTCString());
         console.log(
@@ -191,6 +193,7 @@ export class EventBot {
    */
 
   async getSnailDetail(snailId: number): Promise<SnailDetails> {
+    console.time('checkSnailDetail');
     try {
       const res = await axios.post<SnailDetails>(
         MARKETPLACE_GQL_URL,
@@ -198,6 +201,7 @@ export class EventBot {
         DEFAULT_MARKETPLACE_HEADER,
       );
       console.log('Checking Snail Detail:', res.status);
+      console.timeEnd('checkSnailDetail');
       return res.data;
     } catch (err) {
       console.error('Error fetching single snail', err);
@@ -210,6 +214,7 @@ export class EventBot {
    * This function is important otherwise the bot doesn't know how cheap the current snails are.
    */
   async checkFloorPrice() {
+    console.time('checkFp');
     const content = {} as SnailFloorPrice;
 
     for (let i = 0; i < userInput.length; i++) {
@@ -229,13 +234,7 @@ export class EventBot {
     }
     console.log(content);
     this.snailFloorPrice = content;
-    fs.writeFileSync('./floorPrice.json', JSON.stringify(content));
-  }
-
-  refreshFloorPrice() {
-    this.snailFloorPrice = JSON.parse(
-      fs.readFileSync('./floorPrice.json').toString(),
-    );
+    console.timeEnd('checkFp');
   }
 
   /**
