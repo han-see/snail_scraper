@@ -86,7 +86,7 @@ export class EventBot {
    * @param data
    */
   checkEvent(data: ListingData) {
-    console.time('buyEvent');
+    console.time('checkEvent');
     console.log(new Date().toUTCString(), `Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
       const snailDetail = res;
@@ -99,6 +99,7 @@ export class EventBot {
       console.log('Discount price:', discountPrice);
 
       if (snailPrice <= discountPrice && snailPrice <= maxPrice) {
+        console.time('buyEvent');
         console.log(
           new Date().toUTCString(),
           `Trying to buy snail ${data.snailId}`,
@@ -143,6 +144,7 @@ export class EventBot {
         );
       }
     });
+    console.timeEnd('checkEvent');
   }
 
   sendBuyEventToUser(
