@@ -2,6 +2,13 @@ import PromptSync from 'prompt-sync';
 import * as fs from 'fs';
 import { Wallet } from 'ethers';
 import 'dotenv/config';
+import WebSocket from 'ws';
+import { AVAX_NODE, SNOWSIGHT_WS } from './config';
+import { JsonRpcProvider } from '@ethersproject/providers';
+import { MempoolResponse } from '../types/MempoolResponse';
+import { SNAIL_MARKETPLACE_CONTRACT } from './addresses';
+import { timeStamp } from 'console';
+
 export class Account {
   private _walletAddress: string;
   private _wallet: Wallet;
@@ -17,6 +24,35 @@ export class Account {
     } catch (err) {
       console.error('Account cannot be loaded', err);
     }
+  }
+
+  async connectToSnowsight() {
+    if (this.wallet == undefined) {
+      this.loadAccount();
+    }
+    const key = 'Sign this message to authenticate your wallet with Snowsight.';
+    const signed_key = await this.wallet.signMessage(key);
+
+    const message = JSON.stringify({ signed_key: signed_key });
+
+    const ws = new WebSocket(SNOWSIGHT_WS);
+
+    const provider = new JsonRpcProvider(AVAX_NODE);
+
+    ws.on('open', () => {
+      ws.send(message);
+    });
+
+    ws.on('message', (data) => {
+      //provider.getBlockNumber().then((block) => console.log(block));
+      //console.log(`received: ${data}`);
+      const mempoolResponse: MempoolResponse = JSON.parse(data.toString());
+      // console.log(mempoolResponse)
+      if (mempoolResponse.to == SNAIL_MARKETPLACE_CONTRACT.toLowerCase()) {
+        console.log(Date.now());
+        console.log(mempoolResponse);
+      }
+    });
   }
 
   static makeNewAccount() {
