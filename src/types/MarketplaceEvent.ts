@@ -25,13 +25,13 @@ export interface SaleData {
 export interface ListingData {
   snailMarketId: BigNumber;
   snailId: number;
-  seller: string;
+  seller?: string;
   sellPrice: string;
-  isOnSale: boolean;
+  isOnSale?: boolean;
 }
 
 export function parseListingDataFromMarketplace(data) {
-  console.log(new Date().toUTCString(), 'Parsing data')
+  console.log(new Date().toUTCString(), 'Parsing data');
   const abiCoder = new AbiCoder();
   const decodedData = abiCoder.decode(
     ['uint256', 'uint256', 'address', 'uint256', 'bool'],
