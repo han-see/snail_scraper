@@ -13,6 +13,8 @@ import { QueryAllSnail, QuerySingleSnail } from '../web2_client/Query';
 import { Account } from '../global/Account';
 import 'dotenv/config';
 import { SnailFloorPrice } from '../types/SnailFloorPrice';
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+//@ts-ignore
 import userInput from '../../userInput.json';
 import {
   BlockEvent,
