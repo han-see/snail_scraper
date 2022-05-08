@@ -16,9 +16,17 @@ export const AVAX_WS_NODE = 'wss://api.avax.network/ext/bc/C/ws';
 export const MARKETPLACE_GQL_URL = 'https://api.snailtrail.art/graphql/';
 
 // Snowsight websocket
-export const SNOWSIGHT_WS = 'ws://avax.chainsight.dev:8589';
+export const SNOWSIGHT_WS = 'ws://mempool-stream.snowsight.chainsight.dev:8589';
 
-// Default marketplace header request
+// Snowsight key
+export const SNOWSIGHT_KEY =
+  'Sign this message to authenticate your wallet with Snowsight.';
+
+// Snail Marketplace Contract Address
+export const SNAIL_MARKETPLACE_CONTRACT =
+  '0xeb77bd67Bd607e5b7d9b78db82fad0DE395B5DeF';
+
+// Default marketplace header get request
 export const DEFAULT_MARKETPLACE_HEADER = {
   headers: {
     authority: 'api.snailtrail.art',
@@ -42,3 +50,10 @@ export const DEFAULT_MARKETPLACE_HEADER = {
       'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36',
   },
 };
+
+// Unfinished Marketplace ABI
+export const SNAIL_MARKETPLACE_ABI = [
+  'function listMarketItem(uint256 snailId,uint256 price)',
+  /*"function updatePrice(uint256 marketId, uint256 price)"*/
+  /*"0x74fab4db (uint256 marketId)"*/
+];

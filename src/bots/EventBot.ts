@@ -3,15 +3,16 @@ import {
   AVAX_NODE,
   DEFAULT_MARKETPLACE_HEADER,
   MARKETPLACE_GQL_URL,
+  SNAIL_MARKETPLACE_ABI,
+  SNAIL_MARKETPLACE_CONTRACT,
+  SNOWSIGHT_KEY,
+  SNOWSIGHT_WS,
 } from '../global/config';
 import { SnailDetails } from '../types/SnailDetails';
-import axios from 'axios';
 import { QueryAllSnail, QuerySingleSnail } from '../web2_client/Query';
-import { SNAIL_MARKETPLACE_CONTRACT } from '../global/addresses';
 import { Account } from '../global/Account';
 import 'dotenv/config';
 import { SnailFloorPrice } from '../types/SnailFloorPrice';
-import * as fs from 'fs';
 import userInput from '../../userInput.json';
 import {
   BlockEvent,
@@ -20,8 +21,15 @@ import {
 } from '../types/MarketplaceEvent';
 import { SnailMarketplaceTx } from '../web3_client/SnailMarketplaceTx';
 import { Family } from '../types/Family';
-import { Marketplace } from '../types/MarketplaceResponse';
 import { Webhook } from '../web2_client/Webhook';
+import { MempoolResponse } from '../types/MempoolResponse';
+import WebSocket from 'ws';
+import { BigNumber, Contract, ethers } from 'ethers';
+import { formatEther, Interface } from 'ethers/lib/utils';
+import * as Process from 'process';
+import puppeteer from 'puppeteer-extra';
+import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import { Browser } from 'puppeteer';
 
 const minimumDiscount = Number(process.env.DISCOUNT);
 
@@ -43,11 +51,15 @@ const priceUpdateInMarketplace = {
   topics: [marketplaceUpdatePriceTopics],
 };
 
+const pauseInterval = 500;
+
 export class EventBot {
   private provider: JsonRpcProvider;
   private account: Account;
   private snailFloorPrice: SnailFloorPrice;
   private snailMarketplaceTx: SnailMarketplaceTx;
+  private latestMarketId: number;
+  private browser: Browser;
 
   constructor(account: Account) {
     this.provider = new JsonRpcProvider(AVAX_NODE);
@@ -55,19 +67,22 @@ export class EventBot {
     this.snailMarketplaceTx = new SnailMarketplaceTx(account);
   }
 
-  async listenToListingEvent() {
+  /*
+   * For Now this method is only to listen to the update price event that's being broadcasted from the node
+   * In the future the update price event can also be optimized by listening directly to the mempool*/
+  private async listenToListingUpdatePriceEvent() {
     console.log(await this.provider.getNetwork());
     console.log(
       `Looking for at least ${minimumDiscount * 100}% discount from market`,
     );
     console.log(`Maximum buying price is ${process.env.MAXPRICE} AVAX`);
     try {
-      console.log('Listening to the listing event');
+      /*console.log('Listening to the listing event');
       this.provider.on(listingInMarketplace, (log: BlockEvent) => {
         this.checkFloorPrice();
         const data = parseListingDataFromMarketplace(log.data);
         this.checkEvent(data);
-      });
+      });*/
       console.log('Listening to the update price event');
       this.provider.on(priceUpdateInMarketplace, (log: BlockEvent) => {
         this.checkFloorPrice();
@@ -79,13 +94,68 @@ export class EventBot {
     }
   }
 
+  private async listenToListingEventInMempool() {
+    if (this.account.wallet == undefined) {
+      await this.account.loadAccount();
+    }
+    const signed_key = await this.account.wallet.signMessage(SNOWSIGHT_KEY);
+
+    const message = JSON.stringify({
+      signed_key: signed_key,
+      include_finalized: true,
+    });
+
+    const ws = new WebSocket(SNOWSIGHT_WS);
+
+    ws.on('open', () => {
+      ws.send(message);
+    });
+
+    console.log('Listening to sell listing event');
+
+    ws.on('message', (data) => {
+      this.checkMempoolResponseForSaleEvent(data);
+    });
+  }
+
+  private checkMempoolResponseForSaleEvent(data) {
+    const sellFunction = '2796390c';
+    const mempoolResponse: MempoolResponse = JSON.parse(data.toString());
+    if (
+      mempoolResponse.to === SNAIL_MARKETPLACE_CONTRACT.toLowerCase() &&
+      mempoolResponse.blockNumber === '0x0'
+    ) {
+      console.log(new Date().toUTCString());
+      console.log(mempoolResponse);
+      if (mempoolResponse.input.slice(2, 10) === sellFunction) {
+        this.latestMarketId++;
+        const snailIdInHex = ethers.utils.hexStripZeros(
+          '0x' + mempoolResponse.input.slice(11, 74),
+        );
+        const snailId = BigNumber.from(snailIdInHex).toNumber();
+        const sellPriceInHex = ethers.utils.hexStripZeros(
+          '0x' + mempoolResponse.input.slice(75, 138),
+        );
+        const sellPrice = formatEther(
+          BigNumber.from(sellPriceInHex).toString(),
+        );
+        const data = {
+          snailMarketId: BigNumber.from(this.latestMarketId),
+          snailId: snailId,
+          sellPrice: sellPrice,
+        };
+        this.checkEvent(data);
+      }
+    }
+  }
+
   /**
    * The listing / update price event will be check here. If the event fulfilled the current requirements
    * the snail will be bought from the marketplace and the user will be ping if the buy is successful
    * The discount and the maximum price will be read from the .env files
    * @param data
    */
-  checkEvent(data: ListingData) {
+  private checkEvent(data: ListingData) {
     console.time('checkEvent');
     console.log(new Date().toUTCString(), `Checking Snail ${data.snailId}`);
     this.getSnailDetail(data.snailId).then((res) => {
@@ -147,7 +217,7 @@ export class EventBot {
     console.timeEnd('checkEvent');
   }
 
-  sendBuyEventToUser(
+  private sendBuyEventToUser(
     snailDetail: SnailDetails,
     listingData: ListingData,
     floorPrice: number,
@@ -162,7 +232,11 @@ export class EventBot {
     webhook.sendMessageToUser(floorPrice);
   }
 
-  sendFailedTx(snailDetail: SnailDetails, info: string, floorPrice: number) {
+  private sendFailedTx(
+    snailDetail: SnailDetails,
+    info: string,
+    floorPrice: number,
+  ) {
     const data = snailDetail.data.snail_promise;
     const webhook = new Webhook(
       `Failed to buy Snail - ${data.id}`,
@@ -173,7 +247,7 @@ export class EventBot {
     webhook.sendMessageToUser(floorPrice);
   }
 
-  sendSuccessfulTx(
+  private sendSuccessfulTx(
     snailDetail: SnailDetails,
     info: string,
     floorPrice: number,
@@ -194,20 +268,24 @@ export class EventBot {
    * @returns
    */
 
-  async getSnailDetail(snailId: number): Promise<SnailDetails> {
+  private async getSnailDetail(snailId: number): Promise<SnailDetails> {
     console.time('checkSnailDetail');
+    const query = new QuerySingleSnail(snailId);
+
+    const overrideParam = {
+      method: 'POST',
+      headers: DEFAULT_MARKETPLACE_HEADER.headers,
+      postData: JSON.stringify(query),
+    };
+
     try {
-      const res = await axios.post<SnailDetails>(
-        MARKETPLACE_GQL_URL,
-        new QuerySingleSnail(snailId),
-        DEFAULT_MARKETPLACE_HEADER,
-      );
-      console.log('Checking Snail Detail:', res.status);
+      const response = await this.queryDataFromMarketplaceAPI(overrideParam);
       console.timeEnd('checkSnailDetail');
-      return res.data;
+      return response;
     } catch (err) {
       console.error('Error fetching single snail', err);
     }
+    console.timeEnd('checkSnailDetail');
     return null;
   }
 
@@ -215,21 +293,24 @@ export class EventBot {
    * Function to check the floor price and save it as JSON in the root files.
    * This function is important otherwise the bot doesn't know how cheap the current snails are.
    */
-  async checkFloorPrice() {
+  private async checkFloorPrice() {
     console.time('checkFp');
     const content = {} as SnailFloorPrice;
 
     for (let i = 0; i < userInput.length; i++) {
+      const query = new QueryAllSnail(userInput[i].filter);
+
+      const overrideParam = {
+        method: 'POST',
+        headers: DEFAULT_MARKETPLACE_HEADER.headers,
+        postData: JSON.stringify(query),
+      };
+
       try {
-        const res = await axios.post<Marketplace>(
-          MARKETPLACE_GQL_URL,
-          new QueryAllSnail(userInput[i].filter),
-          DEFAULT_MARKETPLACE_HEADER,
-        );
-        console.log('Checking the floor price: ', res.status);
+        const res = await this.queryDataFromMarketplaceAPI(overrideParam);
         const family = userInput[i].filter.family;
-        content[family] =
-          res.data.data.marketplace_promise.snails[0].market.price;
+        content[family] = res.data.marketplace_promise.snails[0].market.price;
+        await new Promise((resolve) => setTimeout(resolve, pauseInterval));
       } catch (err) {
         console.error('Error during checking floor price', err);
       }
@@ -239,11 +320,80 @@ export class EventBot {
     console.timeEnd('checkFp');
   }
 
+  private async refreshFloorPrice() {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      console.log('Running the refresh loop');
+      await new Promise((resolve) => setTimeout(resolve, 300000));
+      await this.checkFloorPrice();
+    }
+  }
+
+  private async queryDataFromMarketplaceAPI(overrideParam) {
+    const page = await this.browser.newPage();
+    await page.setRequestInterception(true);
+    page.on('request', (interceptRequest) => {
+      interceptRequest.continue(overrideParam);
+    });
+    const response = await page.goto(MARKETPLACE_GQL_URL);
+    const responseBody = JSON.parse(await response.text());
+    await page.close();
+    console.log(`Querying data from API status ${response.status()}`);
+    return responseBody;
+  }
+
+  private async findLatestMarketId() {
+    const marketplaceContract = new Contract(
+      SNAIL_MARKETPLACE_CONTRACT,
+      new Interface(SNAIL_MARKETPLACE_ABI),
+      this.provider,
+    );
+    let currentBlock = await this.provider.getBlockNumber();
+    let isLatestMarketIdFound = false;
+    while (!isLatestMarketIdFound) {
+      console.log(`Checking the latest market ID from block ${currentBlock}`);
+      // max query set data is 2048 (avax node)
+      // max query set data is 2000 (moralis node)
+      const getSaleEvent = await marketplaceContract.queryFilter(
+        listingInMarketplace,
+        currentBlock - 2000,
+        currentBlock,
+      );
+      console.log(getSaleEvent);
+      if (getSaleEvent.length == 0) {
+        currentBlock -= 2000;
+      } else {
+        isLatestMarketIdFound = true;
+        const marketIdInHex = ethers.utils.hexStripZeros(
+          getSaleEvent.at(-1).data.slice(0, 66),
+        );
+        return BigNumber.from(marketIdInHex).toNumber();
+      }
+    }
+    return null;
+  }
+
+  private async createBrowserInstance() {
+    this.browser = await puppeteer
+      .use(StealthPlugin())
+      .launch({ headless: true, args: ['--no-sandbox'] });
+  }
+
   /**
    * Initiate and start the bot
    */
   async startBot() {
+    await this.createBrowserInstance();
     await this.checkFloorPrice();
-    this.listenToListingEvent();
+    this.latestMarketId = await this.findLatestMarketId();
+    console.log(`Latest market id is ${this.latestMarketId}`);
+    if (this.latestMarketId === null || undefined) {
+      console.error('No market id found');
+      //TODO Ping to discord if there's an error on the app
+      Process.exit(1);
+    }
+    this.refreshFloorPrice();
+    this.listenToListingUpdatePriceEvent();
+    this.listenToListingEventInMempool();
   }
 }
