@@ -1,4 +1,5 @@
 export interface MempoolResponse {
+  blockNumber: string;
   from: string;
   gas: string;
   gasPrice: string;

@@ -1,8 +1,7 @@
 import { BigNumber, ethers, Transaction, Wallet } from 'ethers';
 import { Account } from '../global/Account';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { AVAX_NODE } from '../global/config';
-import { SNAIL_MARKETPLACE_CONTRACT } from '../global/addresses';
+import {AVAX_NODE, SNAIL_MARKETPLACE_CONTRACT} from '../global/config';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 export class SnailMarketplaceTx {
