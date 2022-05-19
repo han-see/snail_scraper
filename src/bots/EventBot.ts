@@ -15,7 +15,7 @@ import 'dotenv/config';
 import { SnailFloorPrice } from '../types/SnailFloorPrice';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 //@ts-ignore
-import userInput from '../../userInput.json';
+import filterInput from '../../filterInput.json';
 import {
   BlockEvent,
   ListingData,
@@ -299,8 +299,8 @@ export class EventBot {
     console.time('checkFp');
     const content = {} as SnailFloorPrice;
 
-    for (let i = 0; i < userInput.length; i++) {
-      const query = new QueryAllSnail(userInput[i].filter);
+    for (let i = 0; i < filterInput.length; i++) {
+      const query = new QueryAllSnail(filterInput[i].filter);
 
       const overrideParam = {
         method: 'POST',
@@ -310,7 +310,7 @@ export class EventBot {
 
       try {
         const res = await this.queryDataFromMarketplaceAPI(overrideParam);
-        const family = userInput[i].filter.family;
+        const family = filterInput[i].filter.family;
         content[family] = res.data.marketplace_promise.snails[0].market.price;
         await new Promise((resolve) => setTimeout(resolve, pauseInterval));
       } catch (err) {
