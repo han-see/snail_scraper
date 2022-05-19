@@ -1,9 +1,6 @@
 import { BigNumber } from 'ethers';
 import { AbiCoder, formatEther } from 'ethers/lib/utils';
-<<<<<<< HEAD
 import { SNAIL_MARKETPLACE_CONTRACT } from '../global/config';
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 
 export interface BlockEvent {
   blockNumber: number;
@@ -67,7 +64,6 @@ export function parseSaleDataFromMarketplace(data) {
   };
   return saleData;
 }
-<<<<<<< HEAD
 
 export const marketplaceUpdatePriceTopics =
   '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
@@ -84,5 +80,3 @@ export const priceUpdateInMarketplace = {
   address: SNAIL_MARKETPLACE_CONTRACT,
   topics: [marketplaceUpdatePriceTopics],
 };
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c

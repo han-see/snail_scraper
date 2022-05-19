@@ -3,12 +3,9 @@ import * as fs from 'fs';
 import { Wallet } from 'ethers';
 import 'dotenv/config';
 
-<<<<<<< HEAD
 /**
  * This is a class to generate an account using private key provided by the user and loading an account from the encrypted json file
  */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 export class Account {
   private _walletAddress: string;
   private _wallet: Wallet;

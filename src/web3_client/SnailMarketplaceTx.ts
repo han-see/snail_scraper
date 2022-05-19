@@ -1,18 +1,12 @@
 import { BigNumber, ethers, Transaction, Wallet } from 'ethers';
 import { Account } from '../global/Account';
 import { JsonRpcProvider } from '@ethersproject/providers';
-<<<<<<< HEAD
 import { AVAX_NODE, SNAIL_MARKETPLACE_CONTRACT } from '../global/config';
 import { TransactionResponse } from '@ethersproject/abstract-provider';
 
 /**
  * This class is to generate the transaction to buy the snail on the marketplace
  */
-=======
-import {AVAX_NODE, SNAIL_MARKETPLACE_CONTRACT} from '../global/config';
-import { TransactionResponse } from '@ethersproject/abstract-provider';
-
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 export class SnailMarketplaceTx {
   private wallet: Wallet;
   private walletAddress: string;

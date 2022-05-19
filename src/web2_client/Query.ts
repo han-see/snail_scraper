@@ -79,12 +79,9 @@ export class QueryAllSnail implements Query {
   }
 }
 
-<<<<<<< HEAD
 /**
  * This class is to query single snail to get the snail detail
  */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 export class QuerySingleSnail implements Query {
   operationName = 'getSingleSnail';
   variables = {

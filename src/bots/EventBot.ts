@@ -13,7 +13,6 @@ import { QueryAllSnail, QuerySingleSnail } from '../web2_client/Query';
 import { Account } from '../global/Account';
 import 'dotenv/config';
 import { SnailFloorPrice } from '../types/SnailFloorPrice';
-<<<<<<< HEAD
 import filterInput from '../../filterInput.json';
 import {
   BlockEvent,
@@ -21,15 +20,6 @@ import {
   listingInMarketplace,
   parseListingDataFromMarketplace,
   priceUpdateInMarketplace,
-=======
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
-import userInput from '../../userInput.json';
-import {
-  BlockEvent,
-  ListingData,
-  parseListingDataFromMarketplace,
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 } from '../types/MarketplaceEvent';
 import { SnailMarketplaceTx } from '../web3_client/SnailMarketplaceTx';
 import { Family } from '../types/Family';
@@ -43,7 +33,6 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Browser } from 'puppeteer';
 
-<<<<<<< HEAD
 /**
  * Get the minimum discount from the env file
  */
@@ -62,30 +51,6 @@ const pauseInterval = 500;
 /**
  * This is the main bot class
  */
-=======
-const minimumDiscount = Number(process.env.DISCOUNT);
-
-const maxPrice = Number(process.env.MAXPRICE);
-
-const marketplaceUpdatePriceTopics =
-  '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
-
-const marketplaceListSnailTopics =
-  '0x8b5ebb2dc6de3438616ab5b99285b16a20fb015b845f3458d7215ec10de2c40f';
-
-const listingInMarketplace = {
-  address: SNAIL_MARKETPLACE_CONTRACT,
-  topics: [marketplaceListSnailTopics],
-};
-
-const priceUpdateInMarketplace = {
-  address: SNAIL_MARKETPLACE_CONTRACT,
-  topics: [marketplaceUpdatePriceTopics],
-};
-
-const pauseInterval = 500;
-
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 export class EventBot {
   private provider: JsonRpcProvider;
   private account: Account;
@@ -102,12 +67,8 @@ export class EventBot {
 
   /*
    * For Now this method is only to listen to the update price event that's being broadcasted from the node
-<<<<<<< HEAD
    * In the future the update price event can also be optimized by listening directly to the mempool
    */
-=======
-   * In the future the update price event can also be optimized by listening directly to the mempool*/
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private async listenToListingUpdatePriceEvent() {
     console.log(await this.provider.getNetwork());
     console.log(
@@ -115,15 +76,6 @@ export class EventBot {
     );
     console.log(`Maximum buying price is ${process.env.MAXPRICE} AVAX`);
     try {
-<<<<<<< HEAD
-=======
-      /*console.log('Listening to the listing event');
-      this.provider.on(listingInMarketplace, (log: BlockEvent) => {
-        this.checkFloorPrice();
-        const data = parseListingDataFromMarketplace(log.data);
-        this.checkEvent(data);
-      });*/
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
       console.log('Listening to the update price event');
       this.provider.on(priceUpdateInMarketplace, (log: BlockEvent) => {
         this.checkFloorPrice();
@@ -135,12 +87,9 @@ export class EventBot {
     }
   }
 
-<<<<<<< HEAD
   /**
    * This method is use to initiate the first ws connection to the mempool and listening to the mempool update
    */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private async listenToListingEventInMempool() {
     if (this.account.wallet == undefined) {
       await this.account.loadAccount();
@@ -165,14 +114,11 @@ export class EventBot {
     });
   }
 
-<<<<<<< HEAD
   /**
    * This method is used to check if the event from the mempool is related
    * to the snail marketplace and a sale event (snail listing event)
    * @param data
    */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private checkMempoolResponseForSaleEvent(data) {
     const sellFunction = '2796390c';
     const mempoolResponse: MempoolResponse = JSON.parse(data.toString());
@@ -352,13 +298,8 @@ export class EventBot {
     console.time('checkFp');
     const content = {} as SnailFloorPrice;
 
-<<<<<<< HEAD
     for (let i = 0; i < filterInput.length; i++) {
       const query = new QueryAllSnail(filterInput[i].filter);
-=======
-    for (let i = 0; i < userInput.length; i++) {
-      const query = new QueryAllSnail(userInput[i].filter);
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
 
       const overrideParam = {
         method: 'POST',
@@ -368,11 +309,7 @@ export class EventBot {
 
       try {
         const res = await this.queryDataFromMarketplaceAPI(overrideParam);
-<<<<<<< HEAD
         const family = filterInput[i].filter.family;
-=======
-        const family = userInput[i].filter.family;
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
         content[family] = res.data.marketplace_promise.snails[0].market.price;
         await new Promise((resolve) => setTimeout(resolve, pauseInterval));
       } catch (err) {
@@ -384,12 +321,9 @@ export class EventBot {
     console.timeEnd('checkFp');
   }
 
-<<<<<<< HEAD
   /**
    * Function to refresh the floor price every 5 minutes to avoid cloudflare restrictions
    */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private async refreshFloorPrice() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -412,14 +346,11 @@ export class EventBot {
     return responseBody;
   }
 
-<<<<<<< HEAD
   /**
    * This method is used to check what is the latest market id. To be able to buy the snail, it needs a market Id as a parameter.
    * The market id is generated only after the transaction is mined.
    * @returns
    */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private async findLatestMarketId() {
     const marketplaceContract = new Contract(
       SNAIL_MARKETPLACE_CONTRACT,
@@ -451,12 +382,9 @@ export class EventBot {
     return null;
   }
 
-<<<<<<< HEAD
   /**
    * Create the browser instance to query data from the API using puppeteer to avoid cloudflare.
    */
-=======
->>>>>>> 9761d364ec935f58f48aae3d91547d480b7ab99c
   private async createBrowserInstance() {
     this.browser = await puppeteer
       .use(StealthPlugin())
