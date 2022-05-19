@@ -13,13 +13,13 @@ import { QueryAllSnail, QuerySingleSnail } from '../web2_client/Query';
 import { Account } from '../global/Account';
 import 'dotenv/config';
 import { SnailFloorPrice } from '../types/SnailFloorPrice';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-//@ts-ignore
 import filterInput from '../../filterInput.json';
 import {
   BlockEvent,
   ListingData,
+  listingInMarketplace,
   parseListingDataFromMarketplace,
+  priceUpdateInMarketplace,
 } from '../types/MarketplaceEvent';
 import { SnailMarketplaceTx } from '../web3_client/SnailMarketplaceTx';
 import { Family } from '../types/Family';
@@ -33,28 +33,24 @@ import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { Browser } from 'puppeteer';
 
+/**
+ * Get the minimum discount from the env file
+ */
 const minimumDiscount = Number(process.env.DISCOUNT);
 
+/**
+ * Get the maximum price in Avax that the bot allowed to buy
+ */
 const maxPrice = Number(process.env.MAXPRICE);
 
-const marketplaceUpdatePriceTopics =
-  '0x84e7202ffb140dbeb09920388f40e357a1211b905a1a82b54f213e64942f9daf';
-
-const marketplaceListSnailTopics =
-  '0x8b5ebb2dc6de3438616ab5b99285b16a20fb015b845f3458d7215ec10de2c40f';
-
-const listingInMarketplace = {
-  address: SNAIL_MARKETPLACE_CONTRACT,
-  topics: [marketplaceListSnailTopics],
-};
-
-const priceUpdateInMarketplace = {
-  address: SNAIL_MARKETPLACE_CONTRACT,
-  topics: [marketplaceUpdatePriceTopics],
-};
-
+/**
+ * Pause interval when querying data from the marketplace API
+ */
 const pauseInterval = 500;
 
+/**
+ * This is the main bot class
+ */
 export class EventBot {
   private provider: JsonRpcProvider;
   private account: Account;
@@ -71,7 +67,8 @@ export class EventBot {
 
   /*
    * For Now this method is only to listen to the update price event that's being broadcasted from the node
-   * In the future the update price event can also be optimized by listening directly to the mempool*/
+   * In the future the update price event can also be optimized by listening directly to the mempool
+   */
   private async listenToListingUpdatePriceEvent() {
     console.log(await this.provider.getNetwork());
     console.log(
@@ -79,12 +76,6 @@ export class EventBot {
     );
     console.log(`Maximum buying price is ${process.env.MAXPRICE} AVAX`);
     try {
-      /*console.log('Listening to the listing event');
-      this.provider.on(listingInMarketplace, (log: BlockEvent) => {
-        this.checkFloorPrice();
-        const data = parseListingDataFromMarketplace(log.data);
-        this.checkEvent(data);
-      });*/
       console.log('Listening to the update price event');
       this.provider.on(priceUpdateInMarketplace, (log: BlockEvent) => {
         this.checkFloorPrice();
@@ -96,6 +87,9 @@ export class EventBot {
     }
   }
 
+  /**
+   * This method is use to initiate the first ws connection to the mempool and listening to the mempool update
+   */
   private async listenToListingEventInMempool() {
     if (this.account.wallet == undefined) {
       await this.account.loadAccount();
@@ -120,6 +114,11 @@ export class EventBot {
     });
   }
 
+  /**
+   * This method is used to check if the event from the mempool is related
+   * to the snail marketplace and a sale event (snail listing event)
+   * @param data
+   */
   private checkMempoolResponseForSaleEvent(data) {
     const sellFunction = '2796390c';
     const mempoolResponse: MempoolResponse = JSON.parse(data.toString());
@@ -322,6 +321,9 @@ export class EventBot {
     console.timeEnd('checkFp');
   }
 
+  /**
+   * Function to refresh the floor price every 5 minutes to avoid cloudflare restrictions
+   */
   private async refreshFloorPrice() {
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -344,6 +346,11 @@ export class EventBot {
     return responseBody;
   }
 
+  /**
+   * This method is used to check what is the latest market id. To be able to buy the snail, it needs a market Id as a parameter.
+   * The market id is generated only after the transaction is mined.
+   * @returns
+   */
   private async findLatestMarketId() {
     const marketplaceContract = new Contract(
       SNAIL_MARKETPLACE_CONTRACT,
@@ -375,6 +382,9 @@ export class EventBot {
     return null;
   }
 
+  /**
+   * Create the browser instance to query data from the API using puppeteer to avoid cloudflare.
+   */
   private async createBrowserInstance() {
     this.browser = await puppeteer
       .use(StealthPlugin())

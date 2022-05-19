@@ -35,6 +35,9 @@ export interface IQueryFilter {
   visuals?: any;
 }
 
+/**
+ * This class is for querying all snail from the snail marketplace mainly to check for the floor price
+ */
 export class QueryAllSnail implements Query {
   operationName = 'getAllSnail';
   variables: { filters: QueryFilter | IQueryFilter };
@@ -76,6 +79,9 @@ export class QueryAllSnail implements Query {
   }
 }
 
+/**
+ * This class is to query single snail to get the snail detail
+ */
 export class QuerySingleSnail implements Query {
   operationName = 'getSingleSnail';
   variables = {

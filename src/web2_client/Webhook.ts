@@ -1,5 +1,9 @@
 import { MessageEmbed, WebhookClient } from 'discord.js';
 import 'dotenv/config';
+
+/**
+ * This class is use to send a message to the user discord
+ */
 export class Webhook {
   private embed: MessageEmbed;
   private userWebhookClient = new WebhookClient({
