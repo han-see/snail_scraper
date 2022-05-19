@@ -1,35 +1,25 @@
 [
   {
-    "discount": 0.1,
-    "maxPrice": 2,
     "filter": {
       "family": 1
     }
   },
   {
-    "discount": 0.1,
-    "maxPrice": 2,
     "filter": {
       "family": 2
     }
   },
   {
-    "discount": 0.1,
-    "maxPrice": 2,
     "filter": {
       "family": 3
     }
   },
   {
-    "discount": 0.1,
-    "maxPrice": 2,
     "filter": {
       "family": 4
     }
   },
   {
-    "discount": 0.1,
-    "maxPrice": 2,
     "filter": {
       "family": 5
     }
