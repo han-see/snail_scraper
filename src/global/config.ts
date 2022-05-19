@@ -43,9 +43,7 @@ export const DEFAULT_MARKETPLACE_HEADER = {
   },
 };
 
-// Unfinished Marketplace ABI
+// Unfinished Snail Marketplace ABI
 export const SNAIL_MARKETPLACE_ABI = [
   'function listMarketItem(uint256 snailId,uint256 price)',
-  'function updatePrice(uint256 marketId, uint256 price)',
-  '0x74fab4db (uint256 marketId)',
 ];
